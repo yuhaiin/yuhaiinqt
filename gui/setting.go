@@ -152,18 +152,18 @@ func (s *setting) setLayout() {
 
 func (s *setting) updateData() {
 	refreshConfig()
-	s.systemProxy.SetChecked(conFig.BlackIcon)
-	s.dohCheckBox.SetChecked(conFig.DOH)
-	s.bypassCheckBox.SetChecked(conFig.Bypass)
-	s.dnsProxyCheckBox.SetChecked(conFig.DNSProxy)
-	s.redirHostLineText.SetText(conFig.RedirHost)
-	s.httpHostLineText.SetText(conFig.HTTPHost)
-	s.socks5HostLineText.SetText(conFig.Socks5Host)
-	s.dnsServerLineText.SetText(conFig.DnsServer)
-	s.bypassLineText.SetText(conFig.BypassFile)
-	s.dnsSubNetLineText.SetText(conFig.DnsSubNet)
-	s.directDnsHost.SetText(conFig.DirectDNS.Host)
-	s.directDnsDOH.SetChecked(conFig.DirectDNS.DOH)
+	s.systemProxy.SetChecked(conFig.SystemProxy.Enabled)
+	s.dohCheckBox.SetChecked(conFig.DNS.DOH)
+	s.bypassCheckBox.SetChecked(conFig.Bypass.Enabled)
+	s.dnsProxyCheckBox.SetChecked(conFig.DNS.Proxy)
+	s.redirHostLineText.SetText(conFig.Proxy.Redir)
+	s.httpHostLineText.SetText(conFig.Proxy.HTTP)
+	s.socks5HostLineText.SetText(conFig.Proxy.Socks5)
+	s.dnsServerLineText.SetText(conFig.DNS.Host)
+	s.bypassLineText.SetText(conFig.Bypass.BypassFile)
+	s.dnsSubNetLineText.SetText(conFig.DNS.Subnet)
+	s.directDnsHost.SetText(conFig.LocalDNS.Host)
+	s.directDnsDOH.SetChecked(conFig.LocalDNS.DOH)
 }
 
 func (s *setting) setListener() {
@@ -173,27 +173,35 @@ func (s *setting) setListener() {
 }
 
 func (s *setting) applyCall(_ bool) {
-	if conFig.BlackIcon != s.systemProxy.IsChecked() ||
-		conFig.HTTPHost != s.httpHostLineText.Text() ||
-		conFig.Socks5Host != s.socks5HostLineText.Text() {
-		conFig.BlackIcon = s.systemProxy.IsChecked()
-		if conFig.BlackIcon {
-			sysproxy.SetSysProxy(s.httpHostLineText.Text(), s.socks5HostLineText.Text())
+	if conFig.SystemProxy.Enabled != s.systemProxy.IsChecked() ||
+		conFig.Proxy.HTTP != s.httpHostLineText.Text() ||
+		conFig.Proxy.Socks5 != s.socks5HostLineText.Text() {
+		conFig.SystemProxy.Enabled = s.systemProxy.IsChecked()
+		if conFig.SystemProxy.Enabled {
+			http := s.httpHostLineText.Text()
+			socks5 := s.socks5HostLineText.Text()
+			if !conFig.SystemProxy.Socks5 {
+				socks5 = ""
+			}
+			if !conFig.SystemProxy.HTTP {
+				http = ""
+			}
+			sysproxy.SetSysProxy(http, socks5)
 		} else {
 			sysproxy.UnsetSysProxy()
 		}
 	}
-	conFig.Bypass = s.bypassCheckBox.IsChecked()
-	conFig.DOH = s.dohCheckBox.IsChecked()
-	conFig.DNSProxy = s.dnsProxyCheckBox.IsChecked()
-	conFig.DnsServer = s.dnsServerLineText.Text()
-	conFig.DnsSubNet = s.dnsSubNetLineText.Text()
-	conFig.HTTPHost = s.httpHostLineText.Text()
-	conFig.Socks5Host = s.socks5HostLineText.Text()
-	conFig.RedirHost = s.redirHostLineText.Text()
-	conFig.BypassFile = s.bypassLineText.Text()
-	conFig.DirectDNS.Host = s.directDnsHost.Text()
-	conFig.DirectDNS.DOH = s.directDnsDOH.IsChecked()
+	conFig.Bypass.Enabled = s.bypassCheckBox.IsChecked()
+	conFig.DNS.DOH = s.dohCheckBox.IsChecked()
+	conFig.DNS.Proxy = s.dnsProxyCheckBox.IsChecked()
+	conFig.DNS.Host = s.dnsServerLineText.Text()
+	conFig.DNS.Subnet = s.dnsSubNetLineText.Text()
+	conFig.Proxy.HTTP = s.httpHostLineText.Text()
+	conFig.Proxy.Socks5 = s.socks5HostLineText.Text()
+	conFig.Proxy.Redir = s.redirHostLineText.Text()
+	conFig.Bypass.BypassFile = s.bypassLineText.Text()
+	conFig.LocalDNS.Host = s.directDnsHost.Text()
+	conFig.LocalDNS.DOH = s.directDnsDOH.IsChecked()
 	_, err := grpcConfig.SetConfig(context.Background(), conFig)
 	if err != nil {
 		MessageBox(err.Error())

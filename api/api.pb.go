@@ -6,7 +6,7 @@ package api
 import (
 	context "context"
 	fmt "fmt"
-	config "github.com/Asutorufa/yuhaiin/config"
+	config "github.com/Asutorufa/yuhaiinqt/config"
 	proto "github.com/golang/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	wrappers "github.com/golang/protobuf/ptypes/wrappers"

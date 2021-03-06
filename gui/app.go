@@ -68,8 +68,16 @@ func NewGui(grpcConn grpc.ClientConnInterface) *SGui {
 func (sGui *SGui) initialize() {
 	go func() { _ = sGui.clientInit() }()
 	refreshConfig()
-	if conFig.BlackIcon {
-		sysproxy.SetSysProxy(conFig.HTTPHost, conFig.Socks5Host)
+	if conFig.SystemProxy.Enabled {
+		http := conFig.Proxy.HTTP
+		socks5 := conFig.Proxy.Socks5
+		if !conFig.SystemProxy.Socks5 {
+			socks5 = ""
+		}
+		if !conFig.SystemProxy.HTTP {
+			http = ""
+		}
+		sysproxy.SetSysProxy(http, socks5)
 	}
 }
 
